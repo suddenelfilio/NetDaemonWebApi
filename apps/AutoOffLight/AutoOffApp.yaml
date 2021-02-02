@@ -1,0 +1,2 @@
+auto_off_app:
+  class: daemonapp.apps.AutoOffLight.AutoOffApp

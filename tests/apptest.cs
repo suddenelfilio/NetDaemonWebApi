@@ -1,6 +1,7 @@
+using System;
 using System.Threading.Tasks;
-using HelloWorld;
 using NetDaemon.Daemon.Fakes;
+using daemonapp.apps;
 using Xunit;
 
 /// <summary>
@@ -16,23 +17,48 @@ public class AppTests : DaemonHostTestBase
     {
     }
 
+    // [Fact]
+    // public async Task CallServiceShouldCallCorrectFunction()
+    // {
+    //     // Add the instance of app that we run tests on
+    //     // This need always need to be first operation
+    //     await AddAppInstance(new HelloWorldApp());
+    //
+    //     // Init the fake NetDaemon
+    //     await InitializeFakeDaemon().ConfigureAwait(false);
+    //
+    //     // Add change event to simulate update in state
+    //     AddChangedEvent("binary_sensor.mypir", "off", "on");
+    //
+    //     // Process events and messages in fake Daemon until default timeout
+    //     await RunFakeDaemonUntilTimeout().ConfigureAwait(false);
+    //
+    //     // Verify that light is turned on
+    //     VerifyCallService("light", "turn_on", "light.mylight");
+    // }   
+    
     [Fact]
     public async Task CallServiceShouldCallCorrectFunction()
     {
         // Add the instance of app that we run tests on
         // This need always need to be first operation
-        await AddAppInstance(new HelloWorldApp());
+        var app = new AutoOffApp();
+        await AddAppInstance(app);
 
         // Init the fake NetDaemon
         await InitializeFakeDaemon().ConfigureAwait(false);
 
         // Add change event to simulate update in state
-        AddChangedEvent("binary_sensor.mypir", "off", "on");
+        AddChangedEvent(app.Light.Dakverlichting.EntityId, "off", "on");
+
+        await Task.Delay(TimeSpan.FromSeconds(100));
+        
+        AddChangedEvent(app.Light.Dakverlichting.EntityId, "on", "on");
 
         // Process events and messages in fake Daemon until default timeout
         await RunFakeDaemonUntilTimeout().ConfigureAwait(false);
 
         // Verify that light is turned on
-        VerifyCallService("light", "turn_on", "light.mylight");
+        //VerifyCallService("light", "turn_on", "light.mylight");
     }
 }
