@@ -1,34 +1,52 @@
 using System;
 using System.Threading.Tasks;
-using daemonapp.apps;
-using Netdaemon.Generated.Reactive;
-
+using Microsoft.Extensions.Logging;
+using NetDaemon.Common.Reactive;
 
 namespace daemonapp.apps
 {
-    public class AutoOffApp : GeneratedAppBase
+    public class AutoOffApp : NetDaemonRxApp
     {
+        public string? EntityToControl { get; set; }
+        public string? TriggerEntity { get; set; }
+        public bool? AlsoDim { get; set; }
+        public int? DimDelay { get; set; }
+        public int? DimValue { get; set; }
+        public double TurnOffAfter { get; set; }
+
         public override Task InitializeAsync()
         {
-           // To follow the incoming events
-           // StateChanges.Subscribe(e => Console.WriteLine(e.New));
+            if (EntityToControl == null) return Task.CompletedTask;
 
-            Light
-                .HueComputerLed
-                .TurnedOnBy(InputBoolean.LammellenDakAutomatisaties)
-                .After(TimeSpan.FromSeconds(10))
-                .DimTo(100)
-                .After(TimeSpan.FromSeconds(10))
-                .TurnOff()
+            Logger.LogInformation("========== AUTO OFF APP ===============");
+            Logger.LogInformation($"Entity {EntityToControl} will ");
+
+            var entity = Entity(EntityToControl);
+            RxEntityObservable observable;
+            if (string.IsNullOrEmpty(TriggerEntity))
+            {
+                Logger.LogInformation("  run this app when turned on");
+                observable = entity.TurnedOn();
+            }
+            else
+            {
+                Logger.LogInformation($"  run this app when turned on by {TriggerEntity}");
+                observable = entity.TurnedOnBy(Entity(TriggerEntity));
+            }
+
+            if (AlsoDim.HasValue
+                && AlsoDim.Value
+                && DimDelay.HasValue
+                && DimValue.HasValue)
+            {
+                Logger.LogInformation($"  it will dim to {DimValue} after {DimDelay} seconds");
+                observable = observable.DimToAfter(DimValue.Value, TimeSpan.FromSeconds(DimDelay.Value));
+            }
+
+            Logger.LogInformation($"  it will turn off after {TurnOffAfter} seconds");
+            observable
+                .TurnOffAfter(TimeSpan.FromSeconds(TurnOffAfter))
                 .Subscribe();
-            
-            // //Or shorter
-            // Light
-            //     .HueComputerLed
-            //     .TurnedOnBy(InputBoolean.LammellenDakAutomatisaties)
-            //     .DimToAfter(100,TimeSpan.FromSeconds(10))
-            //     .TurnOffAfter(TimeSpan.FromSeconds(10))
-            //     .Subscribe();
 
             return Task.CompletedTask;
         }

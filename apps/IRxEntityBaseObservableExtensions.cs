@@ -1,34 +1,31 @@
 ﻿using System;
-using System.Reactive;
 using System.Reactive.Linq;
 using NetDaemon.Common.Reactive;
-using Netdaemon.Generated.Reactive;
-using daemonapp.apps;
 
 namespace daemonapp.apps
 {
-    public static class LightObservableExtensions
+    public static class IRxEntityBaseObservableExtensions
     {
-        public static LightEntityObservable TurnedOn(this LightEntity entity)
+        public static RxEntityObservable TurnedOn(this IRxEntityBase entity)
         {
             var source = entity.StateChanges.Where(e => e.New?.State == "on");
             return new(source, entity);
         }
 
-        public static LightEntityObservable TurnedOnBy(this LightEntity entity, RxEntity trigger)
+        public static RxEntityObservable TurnedOnBy(this IRxEntityBase entity, IRxEntityBase trigger)
         {
             var source = trigger.StateChanges.Where(e => e.New?.State == "on");
             source = source.Do(_ => entity.DimTo(255));
             return new(source, entity);
         }
 
-        public static LightEntityObservable After(this LightEntityObservable source, TimeSpan delay)
+        public static RxEntityObservable After(this RxEntityObservable source, TimeSpan delay)
         {
             source.Source = source.Source.Throttle(delay);
             return source;
         }
 
-        public static LightEntityObservable DimTo(this LightEntityObservable source, int dimValue)
+        public static RxEntityObservable DimTo(this RxEntityObservable source, int dimValue)
         {
             source.Source = source.Source
                 .Do(_ => source.Entity.DimTo(dimValue));
@@ -36,7 +33,7 @@ namespace daemonapp.apps
             return source;
         }
 
-        public static LightEntityObservable DimToAfter(this LightEntityObservable source, int dimValue,
+        public static RxEntityObservable DimToAfter(this RxEntityObservable source, int dimValue,
             TimeSpan delay)
         {
             source.Source = source.Source
@@ -46,7 +43,7 @@ namespace daemonapp.apps
             return source;
         }
 
-        public static LightEntityObservable TurnOffAfter(this LightEntityObservable source, TimeSpan delay)
+        public static RxEntityObservable TurnOffAfter(this RxEntityObservable source, TimeSpan delay)
         {
             source.Source = source.Source
                 .Throttle(delay)
@@ -55,7 +52,7 @@ namespace daemonapp.apps
             return source;
         }
 
-        public static LightEntityObservable TurnOff(this LightEntityObservable source)
+        public static RxEntityObservable TurnOff(this RxEntityObservable source)
         {
             source.Source = source.Source
                 .Do(_ => source.Entity.TurnOff());

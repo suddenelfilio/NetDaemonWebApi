@@ -1,15 +1,15 @@
 ﻿using System;
 using NetDaemon.Common;
-using Netdaemon.Generated.Reactive;
+using NetDaemon.Common.Reactive;
 
 namespace daemonapp.apps
 {
-    public class LightEntityObservable:IObservable<(EntityState Old, EntityState New)>
+    public class RxEntityObservable:IObservable<(EntityState Old, EntityState New)>
     {
         public IObservable<(EntityState Old, EntityState New)> Source { get; set; }
-        public LightEntity Entity { get; private set; }
+        public IRxEntityBase Entity { get; private set; }
 
-        public LightEntityObservable(IObservable<(EntityState Old, EntityState New)> source, LightEntity entity)
+        public RxEntityObservable(IObservable<(EntityState Old, EntityState New)> source, IRxEntityBase entity)
         {
             Source = source;
             Entity = entity;

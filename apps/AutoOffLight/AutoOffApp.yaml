@@ -1,2 +1,8 @@
 auto_off_app:
-  class: daemonapp.apps.AutoOffLight.AutoOffApp
+  class: daemonapp.apps.AutoOffApp
+  entity_to_control: light.hue_computer_led
+  trigger_entity: input_boolean.lammellen_dak_automatisaties
+  also_dim: true
+  dim_delay: 10
+  dim_value: 100
+  turn_off_after: 10
